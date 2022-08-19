@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">News app</string>
+    <string name="about_desc">Hello friend!\n\nI\'m Ali Bardideh. I made this project just for fun. Hope you enjoy it :0 \n\nThis is an open source project using newsapi.org apis.\n\nYou can also find me here:</string>
+</resources>
