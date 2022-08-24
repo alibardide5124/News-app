@@ -7,7 +7,7 @@ import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.Query
 
-interface NewsApiService {
+interface NewsApi {
 
     @Headers("x-api-key: ${BuildConfig.API_KEY}")
     @GET(Constants.GET_TOP_HEADLINES)
