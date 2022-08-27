@@ -15,4 +15,6 @@ object Constants {
     const val PARAM_CATEGORY = "category"
     const val PARAM_SOURCES = "sources"
 
+    const val DEFAULT_PAGE_SIZE = 20
+
 }

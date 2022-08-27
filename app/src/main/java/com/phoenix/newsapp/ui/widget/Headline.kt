@@ -22,9 +22,11 @@ import androidx.constraintlayout.compose.Dimension
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.phoenix.newsapp.R
+import com.phoenix.newsapp.data.model.Article
+import com.phoenix.newsapp.data.model.Source
 
 @Composable
-fun Headline() {
+fun Headline(article: Article) {
     ConstraintLayout(
         modifier = Modifier
             .fillMaxWidth()
@@ -34,7 +36,7 @@ fun Headline() {
         val imageGuideline = createGuidelineFromStart(.3f)
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
-                .data("https://example.com/image.jpg")
+                .data(article.urlToImage)
                 .crossfade(true)
                 .build(),
             contentDescription = null,
@@ -52,7 +54,7 @@ fun Headline() {
                 }
         )
         Text(
-            text = "NVIDIA Stock is a Winding Up for a Record Setting Second Half",
+            text = article.title,
             fontWeight = FontWeight.SemiBold,
             fontSize = 16.sp,
             maxLines = 2,
@@ -64,21 +66,39 @@ fun Headline() {
                 width = Dimension.fillToConstraints
             }
         )
-        Text(
-            text = "Jaclyn DeJohn",
-            fontWeight = FontWeight.Medium,
-            fontSize = 14.sp,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier
-                .alpha(.54f)
-                .constrainAs(authorRef) {
-                    top.linkTo(titleRef.bottom, 4.dp)
-                    start.linkTo(imageRef.end, 16.dp)
-                    end.linkTo(parent.end)
-                    width = Dimension.fillToConstraints
-                }
-        )
+        if (article.author != null) {
+            Text(
+                text = article.author,
+                fontWeight = FontWeight.Medium,
+                fontSize = 14.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .alpha(.54f)
+                    .constrainAs(authorRef) {
+                        top.linkTo(titleRef.bottom, 4.dp)
+                        start.linkTo(imageRef.end, 16.dp)
+                        end.linkTo(parent.end)
+                        width = Dimension.fillToConstraints
+                    }
+            )
+        } else if (article.source.name != null) {
+            Text(
+                text = article.source.name,
+                fontWeight = FontWeight.Medium,
+                fontSize = 14.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .alpha(.54f)
+                    .constrainAs(authorRef) {
+                        top.linkTo(titleRef.bottom, 4.dp)
+                        start.linkTo(imageRef.end, 16.dp)
+                        end.linkTo(parent.end)
+                        width = Dimension.fillToConstraints
+                    }
+            )
+        }
         Spacer(
             modifier = Modifier
                 .background(Color.Black)
@@ -94,33 +114,19 @@ fun Headline() {
         )
     }
 }
-//@Composable
-//fun Headline() {
-//    Column(modifier = Modifier.fillMaxWidth()) {
-//        Row(modifier = Modifier.fillMaxWidth()) {
-//            AsyncImage(
-//                model = ImageRequest.Builder(LocalContext.current)
-//                    .data("https://example.com/image.jpg")
-//                    .crossfade(true)
-//                    .build(),
-//                placeholder = painterResource(R.drawable.placeholder),
-//                contentDescription = null,
-//                contentScale = ContentScale.Crop,
-//                modifier = Modifier
-//                    .fillMaxWidth(0.3f)
-//                    .clip(RoundedCornerShape(8.dp))
-//                    .aspectRatio(18 / 9f)
-//            )
-//        }
-//        Spacer(modifier = Modifier.height(8.dp))
-//        Spacer(modifier = Modifier
-//            .height(2.dp)
-//            .background(Color.Black))
-//    }
-//}
 
 @Preview(showBackground = true)
 @Composable
 private fun HeadlinePreview() {
-    Headline()
+    val article = Article(
+        "Jaclyn DeJohn",
+        "",
+        "",
+        "2022-08-26",
+        Source(null, null),
+        "NVIDIA Stock is a Winding Up for a Record Setting Second Half",
+        "www.example.com",
+        "www.example.com/image"
+    )
+    Headline(article)
 }

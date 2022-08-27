@@ -18,7 +18,9 @@ import com.phoenix.newsapp.ui.screen.Screen
 import com.phoenix.newsapp.ui.screen.about.AboutScreen
 import com.phoenix.newsapp.ui.screen.home.HomeScreen
 import com.phoenix.newsapp.ui.theme.NewsAppTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

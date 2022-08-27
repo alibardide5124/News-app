@@ -12,6 +12,7 @@ interface NewsApi {
     @Headers("x-api-key: ${BuildConfig.API_KEY}")
     @GET(Constants.GET_TOP_HEADLINES)
     suspend fun getTopHeadlines(
+        @Query(Constants.PARAM_LANGUAGE) language: String = "en",
         @Query(Constants.PARAM_PAGE_SIZE) pageSize: Int,
         @Query(Constants.PARAM_PAGE) page: Int
     ): NewsResponse

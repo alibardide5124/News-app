@@ -1,11 +1,13 @@
 package com.phoenix.newsapp.ui.widget
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
@@ -25,9 +27,11 @@ import androidx.constraintlayout.compose.Dimension
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.phoenix.newsapp.R
+import com.phoenix.newsapp.data.model.Article
+import com.phoenix.newsapp.data.model.Source
 
 @Composable
-fun HeadlineVerified() {
+fun HeadlineVerified(article: Article) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -39,7 +43,7 @@ fun HeadlineVerified() {
             val (imageRef, shadowRef, titleRef, authorRef) = createRefs()
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data("https://example.com/image.jpg")
+                    .data(article.urlToImage)
                     .crossfade(true)
                     .build(),
                 contentDescription = null,
@@ -77,7 +81,7 @@ fun HeadlineVerified() {
                     )
             )
             Text(
-                text = "AMD releases its own noise suppression tool to take on Nvidia’s RTX Broadcast",
+                text = article.title,
                 color = Color.White,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 16.sp,
@@ -91,22 +95,41 @@ fun HeadlineVerified() {
                         width = Dimension.fillToConstraints
                     }
             )
-            Text(
-                text = "Tom Warren",
-                color = Color.White,
-                fontWeight = FontWeight.Medium,
-                fontSize = 14.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .alpha(.54f)
-                    .constrainAs(authorRef) {
-                        bottom.linkTo(parent.bottom, 16.dp)
-                        start.linkTo(parent.start, 20.dp)
-                        end.linkTo(parent.end, 12.dp)
-                        width = Dimension.fillToConstraints
-                    }
-            )
+            if (article.author != null) {
+                Text(
+                    text = article.author,
+                    color = Color.White,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 14.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .alpha(.54f)
+                        .constrainAs(authorRef) {
+                            bottom.linkTo(parent.bottom, 16.dp)
+                            start.linkTo(parent.start, 20.dp)
+                            end.linkTo(parent.end, 12.dp)
+                            width = Dimension.fillToConstraints
+                        }
+                )
+            } else if (article.source.name != null) {
+                Text(
+                    text = article.source.name,
+                    color = Color.White,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 14.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .alpha(.54f)
+                        .constrainAs(authorRef) {
+                            bottom.linkTo(parent.bottom, 16.dp)
+                            start.linkTo(parent.start, 20.dp)
+                            end.linkTo(parent.end, 12.dp)
+                            width = Dimension.fillToConstraints
+                        }
+                )
+            }
         }
     }
 }
@@ -114,5 +137,15 @@ fun HeadlineVerified() {
 @Preview(showBackground = true)
 @Composable
 private fun HeadlineVerifiedPreview() {
-    HeadlineVerified()
+    val article = Article(
+        "Jaclyn DeJohn",
+        "",
+        "",
+        "2022-08-26",
+        Source(null, null),
+        "NVIDIA Stock is a Winding Up for a Record Setting Second Half",
+        "www.example.com",
+        "www.example.com/image"
+    )
+    HeadlineVerified(article)
 }

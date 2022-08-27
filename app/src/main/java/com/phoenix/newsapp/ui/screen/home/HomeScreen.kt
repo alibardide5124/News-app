@@ -19,14 +19,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.phoenix.newsapp.R
 import com.phoenix.newsapp.ui.screen.Screen
+import com.phoenix.newsapp.ui.widget.ListComposable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavHostController) {
+fun HomeScreen(
+    navController: NavHostController,
+    viewModel: HomeViewModel = hiltViewModel()
+) {
     Scaffold(
         modifier = Modifier,
         topBar = { HomeTopBar(navController) }
@@ -47,6 +52,7 @@ fun HomeScreen(navController: NavHostController) {
                         )
                     )
             )
+            ListComposable(items = viewModel.getTopHeadlines())
         }
     }
 }
