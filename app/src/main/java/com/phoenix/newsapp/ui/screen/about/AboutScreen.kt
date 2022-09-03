@@ -7,13 +7,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -59,22 +60,25 @@ fun AboutScreen(navController: NavHostController) {
                     painter = painterResource(R.drawable.ic_linked),
                     contentDescription = null,
                     modifier = Modifier
-                        .size(32.dp)
+                        .size(48.dp)
                         .clickable { uriHandler.openUri("https://linkedin.com/in/alibardide5124") }
+                        .padding(8.dp)
                 )
                 Image(
                     painter = painterResource(R.drawable.ic_instagram),
                     contentDescription = null,
                     modifier = Modifier
-                        .size(32.dp)
+                        .size(48.dp)
                         .clickable { uriHandler.openUri("https://instagram.com/alibardide.5124") }
+                        .padding(8.dp)
                 )
                 Image(
                     painter = painterResource(R.drawable.ic_github),
                     contentDescription = null,
                     modifier = Modifier
-                        .size(32.dp)
+                        .size(48.dp)
                         .clickable { uriHandler.openUri("https://github.com/alibardide5124") }
+                        .padding(8.dp)
                 )
             }
         }

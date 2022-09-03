@@ -1,6 +1,7 @@
 package com.phoenix.newsapp.ui.widget
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +17,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -39,7 +41,13 @@ fun HeadlineVerified(article: Article) {
             .clip(RoundedCornerShape(8.dp))
             .shadow(1.dp, shape = RoundedCornerShape(8.dp))
     ) {
-        ConstraintLayout(modifier = Modifier.fillMaxWidth().aspectRatio(18 / 9f)) {
+        val uriHandler = LocalUriHandler.current
+        ConstraintLayout(modifier =
+        Modifier
+            .fillMaxWidth()
+            .aspectRatio(18 / 9f)
+            .clickable { uriHandler.openUri(article.url) }
+        ) {
             val (imageRef, shadowRef, titleRef, authorRef) = createRefs()
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
@@ -48,6 +56,7 @@ fun HeadlineVerified(article: Article) {
                     .build(),
                 contentDescription = null,
                 placeholder = painterResource(id = R.drawable.placeholder),
+                error = painterResource(id = R.drawable.placeholder),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .clip(RoundedCornerShape(8.dp))

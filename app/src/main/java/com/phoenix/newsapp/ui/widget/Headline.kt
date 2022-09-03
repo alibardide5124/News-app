@@ -1,6 +1,7 @@
 package com.phoenix.newsapp.ui.widget
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -11,6 +12,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -27,9 +30,11 @@ import com.phoenix.newsapp.data.model.Source
 
 @Composable
 fun Headline(article: Article) {
+    val uriHandler = LocalUriHandler.current
     ConstraintLayout(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable { uriHandler.openUri(article.url) }
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         val (imageRef, titleRef, authorRef, strokeRef) = createRefs()
@@ -41,6 +46,7 @@ fun Headline(article: Article) {
                 .build(),
             contentDescription = null,
             placeholder = painterResource(id = R.drawable.placeholder),
+            error = painterResource(id = R.drawable.placeholder),
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .clip(RoundedCornerShape(8.dp))
@@ -56,7 +62,7 @@ fun Headline(article: Article) {
         Text(
             text = article.title,
             fontWeight = FontWeight.SemiBold,
-            fontSize = 16.sp,
+            fontSize = 14.sp,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.constrainAs(titleRef) {
@@ -70,7 +76,7 @@ fun Headline(article: Article) {
             Text(
                 text = article.author,
                 fontWeight = FontWeight.Medium,
-                fontSize = 14.sp,
+                fontSize = 12.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier

@@ -7,15 +7,16 @@ import com.phoenix.newsapp.utils.Constants
 import retrofit2.HttpException
 import java.io.IOException
 
-class HeadlinesPagingSource(
-    private val newsApi: NewsApi
+class EverythingPagingSource(
+    private val newsApi: NewsApi,
+    private val query: String
 ) : PagingSource<Int, Article>() {
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Article> {
         val pageIndex = params.key ?: 1
         return try {
             val response =
-                newsApi.getTopHeadlines(pageSize = Constants.DEFAULT_PAGE_SIZE, page = pageIndex)
+                newsApi.getEverything(q = query,pageSize = Constants.DEFAULT_PAGE_SIZE, page = pageIndex)
             val articles = response.articles
             val prevKey =
                 if (pageIndex == 1) null

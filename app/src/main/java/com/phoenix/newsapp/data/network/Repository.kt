@@ -23,4 +23,15 @@ class Repository @Inject constructor(
         ).flow
     }
 
+    fun getEverything(query: String): Flow<PagingData<Article>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = Constants.DEFAULT_PAGE_SIZE,
+            ),
+            pagingSourceFactory = {
+                EverythingPagingSource(newsApi, query)
+            }
+        ).flow
+    }
+
 }

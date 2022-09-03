@@ -2,8 +2,9 @@ package com.phoenix.newsapp.utils
 
 object Constants {
 
-    const val GET_EVERYTHING = "v2/everything"
-    const val GET_TOP_HEADLINES = "/v2/top-headlines"
+    const val BASE_URL = "https://newsapi.org/"
+    const val GET_EVERYTHING = "v2/everything/"
+    const val GET_TOP_HEADLINES = "v2/top-headlines/"
 
     const val PARAM_QUERY = "q"
     const val PARAM_TO = "to"
