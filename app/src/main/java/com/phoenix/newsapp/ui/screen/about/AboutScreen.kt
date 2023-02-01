@@ -1,20 +1,16 @@
 package com.phoenix.newsapp.ui.screen.about
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -48,7 +44,7 @@ fun AboutScreen(navController: NavHostController) {
             HyperlinkText(
                 text = stringResource(R.string.about_desc),
                 modifier = Modifier.padding(horizontal = 24.dp),
-                color = Color(0xDE000000),
+                color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
                 linkText = listOf("newsapi.org"),
@@ -82,19 +78,12 @@ fun AboutScreen(navController: NavHostController) {
                 )
             }
         }
-        IconButton(onClick = { navController.popBackStack() }, modifier = Modifier.padding(16.dp)) {
+        IconButton(onClick = { navController.popBackStack() }) {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
                 contentDescription = null,
+                tint = MaterialTheme.colorScheme.onBackground
             )
-        }
-        OutlinedButton(
-            modifier = Modifier.align(Alignment.BottomEnd).padding(horizontal = 24.dp, vertical = 16.dp),
-            shape = RoundedCornerShape(8.dp),
-            border = BorderStroke(2.dp, Color(0xFF4481A1)),
-            onClick = { /*TODO: Show libraries */ }
-        ) {
-            Text(text = "Third party libraries", color = Color.Black)
         }
     }
 }

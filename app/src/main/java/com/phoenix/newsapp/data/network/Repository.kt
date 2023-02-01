@@ -4,7 +4,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.phoenix.newsapp.data.model.Article
-import com.phoenix.newsapp.utils.Constants
+import com.phoenix.newsapp.ui.screen.utils.Constants
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 

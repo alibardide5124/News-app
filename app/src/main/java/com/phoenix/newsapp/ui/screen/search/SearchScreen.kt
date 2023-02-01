@@ -36,8 +36,7 @@ import com.phoenix.newsapp.ui.widget.ListComposable
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
-    navController: NavHostController,
-    viewModel: SearchViewModel = hiltViewModel()
+    navController: NavHostController, viewModel: SearchViewModel = hiltViewModel()
 ) {
     val searchQuery = viewModel.searchQuery
     val searchedArticles = viewModel.searchedArticles
@@ -45,21 +44,15 @@ fun SearchScreen(
     var isSearched by remember { mutableStateOf(false) }
 
     Scaffold(
-        modifier = Modifier,
         topBar = {
-            SearchTopAppBar(
-                searchQuery,
-                onTextChange = {
-                    viewModel.updateSearchQuery(it)
-                },
-                onSearchClicked = {
-                    viewModel.searchArticles(it)
-                    isSearched = true
-                },
-                onCloseClicked = {
-                    navController.popBackStack()
-                }
-            )
+            SearchTopAppBar(searchQuery, onTextChange = {
+                viewModel.updateSearchQuery(it)
+            }, onSearchClicked = {
+                viewModel.searchArticles(it)
+                isSearched = true
+            }, onCloseClicked = {
+                navController.popBackStack()
+            })
         }
     ) {
         Box(
@@ -72,8 +65,7 @@ fun SearchScreen(
                     .background(
                         brush = Brush.verticalGradient(
                             colors = listOf(
-                                Color(0x21212121),
-                                Color.Transparent
+                                Color(0x21212121), Color.Transparent
                             )
                         )
                     )
@@ -99,7 +91,6 @@ private fun SearchTopAppBar(
     OutlinedTextField(
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp)
             .padding(vertical = 6.dp, horizontal = 8.dp),
         value = text,
         onValueChange = { string: String ->
@@ -108,7 +99,9 @@ private fun SearchTopAppBar(
         placeholder = {
             Text(
                 text = "Search in the news...",
-                modifier = Modifier.alpha(0.54f),
+                modifier = Modifier
+                    .alpha(0.54f)
+                    .padding(0.dp),
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Medium
             )
@@ -124,15 +117,14 @@ private fun SearchTopAppBar(
         trailingIcon = {
             IconButton(onClick = { onCloseClicked() }) {
                 Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = null
+                    imageVector = Icons.Default.Close, contentDescription = null
                 )
             }
         },
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         keyboardActions = KeyboardActions(onSearch = { onSearchClicked(text) }),
         textStyle = TextStyle(
-            color = Color(0xDE000000),
+            color = MaterialTheme.colorScheme.onBackground,
             fontSize = 15.sp,
             fontWeight = FontWeight.Bold
         ),
@@ -157,14 +149,14 @@ private fun EmptySearchIllustration() {
         Spacer(modifier = Modifier.height(12.dp))
         Text(
             text = "Search in the news",
-            color = Color(0xDE000000),
+            color = MaterialTheme.colorScheme.onBackground,
             fontSize = 16.sp,
             fontWeight = FontWeight.SemiBold
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Search among the thousands of news!\nfrom many different sources",
-            color = Color(0x8A000000),
+            text = "Search among the thousands of news!\nfrom different & reliable sources",
+            color = MaterialTheme.colorScheme.onBackground,
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium,
             textAlign = TextAlign.Center

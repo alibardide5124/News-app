@@ -1,7 +1,7 @@
 package com.phoenix.newsapp
 
 import com.phoenix.newsapp.data.network.NewsApi
-import com.phoenix.newsapp.utils.Constants
+import com.phoenix.newsapp.ui.screen.utils.Constants
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

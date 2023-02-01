@@ -30,7 +30,6 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     Scaffold(
-        modifier = Modifier,
         topBar = { HomeTopBar(navController) }
     ) {
         Box(
@@ -71,7 +70,7 @@ private fun HomeTopBar(navController: NavHostController) {
         }
         Text(
             text = stringResource(R.string.app_name),
-            color = Color(0xDE000000),
+            color = MaterialTheme.colorScheme.onBackground,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold
         )
