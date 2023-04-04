@@ -1,6 +1,7 @@
 package com.phoenix.newsapp.ui.widget
 
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -15,7 +16,7 @@ import androidx.compose.ui.unit.TextUnit
 fun HyperlinkText(
     modifier: Modifier = Modifier,
     text: String,
-    color: Color = Color(0xDE000000),
+    color: Color = MaterialTheme.colorScheme.onBackground,
     linkText: List<String>,
     linkTextColor: Color = Color(0xFF4481A1),
     fontWeight: FontWeight = FontWeight.Medium,

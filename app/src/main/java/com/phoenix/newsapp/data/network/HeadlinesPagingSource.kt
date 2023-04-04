@@ -3,7 +3,7 @@ package com.phoenix.newsapp.data.network
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.phoenix.newsapp.data.model.Article
-import com.phoenix.newsapp.ui.screen.utils.Constants
+import com.phoenix.newsapp.Constants
 import retrofit2.HttpException
 import java.io.IOException
 

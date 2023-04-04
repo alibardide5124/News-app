@@ -5,7 +5,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -20,39 +22,55 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.phoenix.newsapp.R
+import com.phoenix.newsapp.data.model.Article
+import com.phoenix.newsapp.ui.bottomsheet.news.BottomSheetContent
+import com.phoenix.newsapp.ui.bottomsheet.news.SavedState
 import com.phoenix.newsapp.ui.widget.ListComposable
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
+@Destination
 @Composable
 fun SearchScreen(
-    navController: NavHostController, viewModel: SearchViewModel = hiltViewModel()
+    navigator: DestinationsNavigator,
+    viewModel: SearchViewModel = hiltViewModel()
 ) {
-    val searchQuery = viewModel.searchQuery
-    val searchedArticles = viewModel.searchedArticles
+    val uiState by viewModel.uiState.collectAsState()
+    val newsSheetUiState by viewModel.newsSheetUiState.collectAsState()
+    val listState = rememberLazyListState(uiState.firstVisibleItem)
 
-    var isSearched by remember { mutableStateOf(false) }
+    LaunchedEffect(listState) {
+        viewModel.updateListState(listState.firstVisibleItemIndex)
+    }
+    val sheetState = rememberModalBottomSheetState()
+    val coroutineScope = rememberCoroutineScope()
+    var currentItem: Article? by remember { mutableStateOf(null) }
+
+    viewModel.updateNavigator(navigator)
 
     Scaffold(
         topBar = {
-            SearchTopAppBar(searchQuery, onTextChange = {
-                viewModel.updateSearchQuery(it)
-            }, onSearchClicked = {
-                viewModel.searchArticles(it)
-                isSearched = true
-            }, onCloseClicked = {
-                navController.popBackStack()
-            })
+            SearchTopAppBar(
+                text = uiState.searchedQuery,
+                onTextChange = {
+                    viewModel.onEvent(SearchUiEvent.OnSearchQueryChange(it))
+                }, onSearchClicked = {
+                    viewModel.onEvent(SearchUiEvent.OnHitSearch)
+                }, onCloseClicked = {
+                    navigator.popBackStack()
+                }
+            )
         }
     ) {
         Box(
@@ -70,22 +88,44 @@ fun SearchScreen(
                         )
                     )
             )
-            AnimatedVisibility(visible = isSearched.not(), enter = fadeIn(), exit = fadeOut()) {
+            AnimatedVisibility(
+                visible = uiState.isSearched.not(),
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
                 EmptySearchIllustration()
             }
-            AnimatedVisibility(visible = isSearched, enter = fadeIn(), exit = fadeOut()) {
-                ListComposable(items = searchedArticles)
+            AnimatedVisibility(visible = uiState.isSearched, enter = fadeIn(), exit = fadeOut()) {
+                ListComposable(items = viewModel.searchedArticles, listState) { article ->
+                    currentItem = article
+                    coroutineScope.launch {
+                        sheetState.show()
+                        viewModel.isArticleExistsInFavorite(article.url)
+                    }
+                }
+            }
+        }
+    }
+    if (sheetState.isVisible) {
+        ModalBottomSheet(
+            onDismissRequest = {},
+            sheetState = sheetState
+        ) {
+            BottomSheetContent(currentItem!!, newsSheetUiState) {
+                if (newsSheetUiState.savedState == SavedState.Saved)
+                    viewModel.deleteArticle(currentItem!!)
+                else if (newsSheetUiState.savedState == SavedState.NotSaved)
+                    viewModel.insertArticle(currentItem!!)
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SearchTopAppBar(
     text: String,
     onTextChange: (String) -> Unit,
-    onSearchClicked: (String) -> Unit,
+    onSearchClicked: () -> Unit,
     onCloseClicked: () -> Unit
 ) {
     OutlinedTextField(
@@ -111,7 +151,9 @@ private fun SearchTopAppBar(
             Icon(
                 imageVector = Icons.Outlined.Search,
                 contentDescription = null,
-                Modifier.alpha(0.54f)
+                Modifier
+                    .alpha(0.54f)
+                    .clickable { onSearchClicked() }
             )
         },
         trailingIcon = {
@@ -122,7 +164,7 @@ private fun SearchTopAppBar(
             }
         },
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-        keyboardActions = KeyboardActions(onSearch = { onSearchClicked(text) }),
+        keyboardActions = KeyboardActions(onSearch = { onSearchClicked() }),
         textStyle = TextStyle(
             color = MaterialTheme.colorScheme.onBackground,
             fontSize = 15.sp,
@@ -162,11 +204,4 @@ private fun EmptySearchIllustration() {
             textAlign = TextAlign.Center
         )
     }
-}
-
-@Preview(showSystemUi = true)
-@Composable
-private fun HomePreview() {
-    val navController = rememberNavController()
-    SearchScreen(navController)
 }

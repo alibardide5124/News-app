@@ -1,4 +1,4 @@
-package com.phoenix.newsapp.ui.screen.utils
+package com.phoenix.newsapp
 
 object Constants {
 

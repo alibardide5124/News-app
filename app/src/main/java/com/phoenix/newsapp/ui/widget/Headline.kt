@@ -1,11 +1,13 @@
 package com.phoenix.newsapp.ui.widget
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -15,7 +17,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -25,34 +26,36 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import coil.compose.AsyncImagePainter
-import coil.compose.SubcomposeAsyncImage
-import coil.compose.SubcomposeAsyncImageContent
+import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.phoenix.newsapp.R
 import com.phoenix.newsapp.data.model.Article
 import com.phoenix.newsapp.data.model.Source
 
 @Composable
-fun Headline(article: Article) {
-    val uriHandler = LocalUriHandler.current
+fun Headline(
+    article: Article,
+    onClick: () -> Unit
+) {
     ConstraintLayout(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { uriHandler.openUri(article.url) }
+            .clickable { onClick() }
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         val (imageRef, titleRef, authorRef, strokeRef) = createRefs()
         val imageGuideline = createGuidelineFromStart(.3f)
 
-        SubcomposeAsyncImage(
+        val imagePainter = rememberAsyncImagePainter(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(article.urlToImage)
                 .crossfade(true)
                 .build(),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
+            contentScale = ContentScale.Crop
+            )
+        Box(
             modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
+                .fillMaxSize()
                 .constrainAs(imageRef) {
                     top.linkTo(parent.top)
                     start.linkTo(parent.start)
@@ -61,32 +64,28 @@ fun Headline(article: Article) {
                     width = Dimension.fillToConstraints
                     height = Dimension.fillToConstraints
                 }
+                .clip(RoundedCornerShape(8.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant),
+            contentAlignment = Alignment.Center
         ) {
-            when (painter.state) {
-                is AsyncImagePainter.State.Loading -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(12.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
+            when (imagePainter.state) {
+                is AsyncImagePainter.State.Loading ->
+                    CircularProgressIndicator()
+                AsyncImagePainter.State.Empty, is AsyncImagePainter.State.Error -> {
+                    Icon(
+                        painterResource(R.drawable.ic_image),
+                        null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
-                is AsyncImagePainter.State.Error -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(Color(0xFFCDCDCD))
-                            .padding(12.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(painterResource(R.drawable.ic_image), null, tint = Color(0xFF212121))
-                    }
-                }
-                else -> SubcomposeAsyncImageContent()
+                else -> {}
             }
+            Image(
+                painter = imagePainter,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
         }
         Text(
             text = article.title,
@@ -163,5 +162,5 @@ private fun HeadlinePreview() {
         "www.example.com",
         "www.example.com/image"
     )
-    Headline(article)
+    Headline(article) {}
 }

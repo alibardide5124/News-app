@@ -1,10 +1,12 @@
 package com.phoenix.newsapp.ui.widget
 
+import com.phoenix.newsapp.R
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -13,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -25,7 +28,11 @@ import com.phoenix.newsapp.data.model.Article
 import kotlinx.coroutines.flow.Flow
 
 @Composable
-fun ListComposable(items: Flow<PagingData<Article>>) {
+fun ListComposable(
+    items: Flow<PagingData<Article>>,
+    listState: LazyListState,
+    onItemClick: (Article) -> Unit
+) {
     val lazyItems = items.collectAsLazyPagingItems()
 //    Initial loading page
     AnimatedVisibility(
@@ -41,14 +48,14 @@ fun ListComposable(items: Flow<PagingData<Article>>) {
             CircularProgressIndicator(modifier = Modifier.size(48.dp))
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = "Hang in there!",
+                text = stringResource(id = R.string.loading_title),
                 color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "We're getting some fresh news for you...",
+                text = stringResource(id = R.string.loading_massage),
                 color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
@@ -78,7 +85,7 @@ fun ListComposable(items: Flow<PagingData<Article>>) {
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Usually we say \"Check your internet connection.\"",
+                text = "Check your internet connection",
                 color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
@@ -97,10 +104,12 @@ fun ListComposable(items: Flow<PagingData<Article>>) {
         enter = fadeIn(),
         exit = fadeOut()
     ) {
-        LazyColumn {
+        LazyColumn(state = listState) {
             items(lazyItems) { article ->
-                if (article!!.source.id != null) HeadlineVerified(article)
-                else Headline(article)
+                if (article!!.source.id != null)
+                    HeadlineVerified(article) { onItemClick(article) }
+                else
+                    Headline(article) { onItemClick(article) }
             }
 //            Circle loading at the end of list
             if (lazyItems.loadState.append is LoadState.Loading) {
@@ -116,13 +125,14 @@ fun ListComposable(items: Flow<PagingData<Article>>) {
                 }
             }
 //            Error on loading next page
-            if (lazyItems.loadState.append is LoadState.Error && lazyItems.itemCount < 100) {
+            if (lazyItems.loadState.append is LoadState.Error && lazyItems.itemCount < 90) {
                 item {
-                    HeadlineError(lazyItems)
+                    HeadlineError { lazyItems.retry() }
+                    Text(text = lazyItems.itemCount.toString())
                 }
             }
 //            Message at the end of list (newsapi only support 100 items per request)
-            if (lazyItems.loadState.append is LoadState.Error && lazyItems.itemCount == 100) {
+            if (lazyItems.loadState.append is LoadState.Error && lazyItems.itemCount >= 90) {
                 item {
                     HeadlineEnd()
                 }
