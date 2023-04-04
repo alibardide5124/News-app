@@ -2,7 +2,7 @@ package com.phoenix.newsapp.data.network
 
 import com.phoenix.newsapp.BuildConfig
 import com.phoenix.newsapp.data.network.response.NewsResponse
-import com.phoenix.newsapp.ui.screen.utils.Constants
+import com.phoenix.newsapp.Constants
 import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.Query
