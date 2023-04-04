@@ -1,11 +1,13 @@
 package com.phoenix.newsapp.ui.widget
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -17,7 +19,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -27,15 +28,17 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import coil.compose.AsyncImagePainter
-import coil.compose.SubcomposeAsyncImage
-import coil.compose.SubcomposeAsyncImageContent
+import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.phoenix.newsapp.R
 import com.phoenix.newsapp.data.model.Article
 import com.phoenix.newsapp.data.model.Source
 
 @Composable
-fun HeadlineVerified(article: Article) {
+fun HeadlineVerified(
+    article: Article,
+    onClick: () -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -43,24 +46,23 @@ fun HeadlineVerified(article: Article) {
             .clip(RoundedCornerShape(8.dp))
             .shadow(1.dp, shape = RoundedCornerShape(8.dp))
     ) {
-        val uriHandler = LocalUriHandler.current
-        ConstraintLayout(modifier =
-        Modifier
+        ConstraintLayout(modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(18 / 9f)
-            .clickable { uriHandler.openUri(article.url) }
+            .clickable { onClick() }
         ) {
             val (imageRef, shadowRef, titleRef, authorRef) = createRefs()
 
-            SubcomposeAsyncImage(
+            val imagePainter = rememberAsyncImagePainter(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(article.urlToImage)
                     .crossfade(true)
                     .build(),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
+                contentScale = ContentScale.Crop
+            )
+            Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
+                    .fillMaxSize()
                     .constrainAs(imageRef) {
                         top.linkTo(parent.top)
                         start.linkTo(parent.start)
@@ -69,32 +71,27 @@ fun HeadlineVerified(article: Article) {
                         width = Dimension.fillToConstraints
                         height = Dimension.fillToConstraints
                     }
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentAlignment = Alignment.Center
             ) {
-                when (painter.state) {
-                    is AsyncImagePainter.State.Loading -> {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(24.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
-                    }
-                    is AsyncImagePainter.State.Error -> {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(Color(0xFFCDCDCD))
-                                .padding(24.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(painterResource(R.drawable.ic_image), null, tint = Color(0xFF212121))
-                        }
-                    }
-                    else -> SubcomposeAsyncImageContent()
+                when (imagePainter.state) {
+                    is AsyncImagePainter.State.Loading ->
+                        CircularProgressIndicator()
+                    is AsyncImagePainter.State.Error ->
+                        Icon(
+                            painterResource(R.drawable.ic_image),
+                            null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(24.dp)
+                        )
+                    else -> {}
                 }
+                Image(
+                    painter = imagePainter,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
             }
             Box(
                 modifier = Modifier
@@ -174,6 +171,7 @@ fun HeadlineVerified(article: Article) {
 @Composable
 private fun HeadlineVerifiedPreview() {
     val article = Article(
+        0,
         "Jaclyn DeJohn",
         "",
         "",
@@ -183,5 +181,5 @@ private fun HeadlineVerifiedPreview() {
         "www.example.com",
         "www.example.com/image"
     )
-    HeadlineVerified(article)
+    HeadlineVerified(article) {}
 }
