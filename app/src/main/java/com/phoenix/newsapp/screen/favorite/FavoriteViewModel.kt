@@ -1,14 +1,13 @@
-package com.phoenix.newsapp.ui.screen.favorite
+package com.phoenix.newsapp.screen.favorite
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import com.phoenix.newsapp.BottomSheets
 import com.phoenix.newsapp.data.database.ArticleBookmarkDao
 import com.phoenix.newsapp.data.model.Article
 import com.phoenix.newsapp.data.Repository
-import com.phoenix.newsapp.ui.bottomsheet.news.NewsSheetUiState
-import com.phoenix.newsapp.ui.bottomsheet.news.SavedState
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +23,7 @@ class FavoriteViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FavoriteUiState())
-    private val _newsSheetUiState = MutableStateFlow(NewsSheetUiState())
+    private val _newsSheetUiState = MutableStateFlow(BottomSheets.NewsSheetUiState())
     val uiState = _uiState.asStateFlow()
     val newsSheetUiState = _newsSheetUiState.asStateFlow()
     private lateinit var navigator: DestinationsNavigator
@@ -52,28 +51,28 @@ class FavoriteViewModel @Inject constructor(
     }
 
     fun insertArticle(article: Article) {
-        _newsSheetUiState.update { it.copy(savedState = SavedState.Loading) }
+        _newsSheetUiState.update { it.copy(savedState = BottomSheets.SavedState.Loading) }
         viewModelScope.launch {
             articleBookmarkDao.insertArticle(article)
-            _newsSheetUiState.update { it.copy(savedState = SavedState.Saved) }
+            _newsSheetUiState.update { it.copy(savedState = BottomSheets.SavedState.Saved) }
         }
     }
 
     fun deleteArticle(article: Article) {
-        _newsSheetUiState.update { it.copy(savedState = SavedState.Loading) }
+        _newsSheetUiState.update { it.copy(savedState = BottomSheets.SavedState.Loading) }
         viewModelScope.launch {
             articleBookmarkDao.deleteArticle(article)
-            _newsSheetUiState.update { it.copy(savedState = SavedState.NotSaved) }
+            _newsSheetUiState.update { it.copy(savedState = BottomSheets.SavedState.NotSaved) }
         }
     }
 
     suspend fun isArticleExistsInFavorite(url: String) {
-        _newsSheetUiState.update { it.copy(savedState = SavedState.Loading) }
+        _newsSheetUiState.update { it.copy(savedState = BottomSheets.SavedState.Loading) }
         val isExist = articleBookmarkDao.isRowExist(url)
         if (isExist)
-            _newsSheetUiState.update { it.copy(savedState = SavedState.Saved) }
+            _newsSheetUiState.update { it.copy(savedState = BottomSheets.SavedState.Saved) }
         else
-            _newsSheetUiState.update { it.copy(savedState = SavedState.NotSaved) }
+            _newsSheetUiState.update { it.copy(savedState = BottomSheets.SavedState.NotSaved) }
     }
 
 }

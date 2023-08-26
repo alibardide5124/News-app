@@ -1,4 +1,4 @@
-package com.phoenix.newsapp.ui.widget
+package com.phoenix.newsapp.widget
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

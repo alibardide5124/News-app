@@ -1,4 +1,4 @@
-package com.phoenix.newsapp.ui.screen.search
+package com.phoenix.newsapp.screen.search
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -30,11 +30,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.phoenix.newsapp.BottomSheets
 import com.phoenix.newsapp.R
 import com.phoenix.newsapp.data.model.Article
-import com.phoenix.newsapp.ui.bottomsheet.news.BottomSheetContent
-import com.phoenix.newsapp.ui.bottomsheet.news.SavedState
-import com.phoenix.newsapp.ui.widget.ListComposable
+import com.phoenix.newsapp.widget.ListComposable
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
@@ -113,10 +112,10 @@ fun SearchScreen(
             onDismissRequest = {},
             sheetState = sheetState
         ) {
-            BottomSheetContent(currentItem!!, newsSheetUiState) {
-                if (newsSheetUiState.savedState == SavedState.Saved)
+            BottomSheets.BottomSheetContent(currentItem!!, newsSheetUiState) {
+                if (newsSheetUiState.savedState == BottomSheets.SavedState.Saved)
                     viewModel.deleteArticle(currentItem!!)
-                else if (newsSheetUiState.savedState == SavedState.NotSaved)
+                else if (newsSheetUiState.savedState == BottomSheets.SavedState.NotSaved)
                     viewModel.insertArticle(currentItem!!)
             }
         }

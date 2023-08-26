@@ -1,4 +1,4 @@
-package com.phoenix.newsapp.ui.screen.favorite
+package com.phoenix.newsapp.screen.favorite
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -16,11 +16,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.phoenix.newsapp.BottomSheets
 import com.phoenix.newsapp.data.model.Article
-import com.phoenix.newsapp.ui.bottomsheet.news.BottomSheetContent
-import com.phoenix.newsapp.ui.bottomsheet.news.SavedState
-import com.phoenix.newsapp.ui.widget.FavoriteListComposable
-import com.phoenix.newsapp.ui.widget.ListComposable
+import com.phoenix.newsapp.widget.FavoriteListComposable
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
@@ -84,10 +82,10 @@ fun FavoriteScreen(
             onDismissRequest = {},
             sheetState = sheetState
         ) {
-            BottomSheetContent(currentItem!!, newsSheetUiState) {
-                if (newsSheetUiState.savedState == SavedState.Saved)
+            BottomSheets.BottomSheetContent(currentItem!!, newsSheetUiState) {
+                if (newsSheetUiState.savedState == BottomSheets.SavedState.Saved)
                     viewModel.deleteArticle(currentItem!!)
-                else if (newsSheetUiState.savedState == SavedState.NotSaved)
+                else if (newsSheetUiState.savedState == BottomSheets.SavedState.NotSaved)
                     viewModel.insertArticle(currentItem!!)
             }
         }

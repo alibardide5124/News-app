@@ -1,5 +1,6 @@
-package com.phoenix.newsapp.ui.widget
+package com.phoenix.newsapp.widget
 
+import com.phoenix.newsapp.R
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -14,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -26,7 +28,7 @@ import com.phoenix.newsapp.data.model.Article
 import kotlinx.coroutines.flow.Flow
 
 @Composable
-fun FavoriteListComposable(
+fun ListComposable(
     items: Flow<PagingData<Article>>,
     listState: LazyListState,
     onItemClick: (Article) -> Unit
@@ -46,10 +48,19 @@ fun FavoriteListComposable(
             CircularProgressIndicator(modifier = Modifier.size(48.dp))
             Spacer(modifier = Modifier.height(12.dp))
             Text(
-                text = "Loading saved news...",
+                text = stringResource(id = R.string.loading_title),
                 color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = stringResource(id = R.string.loading_massage),
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.alpha(0.8f)
             )
         }
     }
@@ -67,10 +78,19 @@ fun FavoriteListComposable(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Couldn't load saved articles :(",
+                text = "Looks like we lost our connection",
                 color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Check your internet connection",
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.alpha(0.8f)
             )
             Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = { lazyItems.refresh() }) {
@@ -78,41 +98,18 @@ fun FavoriteListComposable(
             }
         }
     }
-//    Empty list
+//    News list
     AnimatedVisibility(
-        visible = lazyItems.itemCount == 0 && lazyItems.loadState.refresh is LoadState.NotLoading,
+        visible = lazyItems.itemCount != 0,
         enter = fadeIn(),
         exit = fadeOut()
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "No favorites :(",
-                color = MaterialTheme.colorScheme.onBackground,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold,
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "You might like to consider add some news next time",
-                color = MaterialTheme.colorScheme.onBackground,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.alpha(0.8f)
-            )
-        }
-    }
-//    News list
-    AnimatedVisibility(visible = lazyItems.itemCount != 0, enter = fadeIn(), exit = fadeOut()) {
         LazyColumn(state = listState) {
             items(lazyItems) { article ->
-                Headline(article!!) { onItemClick(article) }
+                if (article!!.source.id != null)
+                    HeadlineVerified(article) { onItemClick(article) }
+                else
+                    Headline(article) { onItemClick(article) }
             }
 //            Circle loading at the end of list
             if (lazyItems.loadState.append is LoadState.Loading) {
@@ -125,6 +122,19 @@ fun FavoriteListComposable(
                     ) {
                         CircularProgressIndicator()
                     }
+                }
+            }
+//            Error on loading next page
+            if (lazyItems.loadState.append is LoadState.Error && lazyItems.itemCount < 90) {
+                item {
+                    HeadlineError { lazyItems.retry() }
+                }
+            }
+//            Message at the end of list (newsapi only support 100 items per request)
+            if (lazyItems.loadState.append is LoadState.Error && lazyItems.itemCount >= 90) {
+                item {
+                    HeadlineEnd()
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
             }
         }

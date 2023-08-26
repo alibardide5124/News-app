@@ -1,4 +1,4 @@
-package com.phoenix.newsapp.ui.screen.about
+package com.phoenix.newsapp.screen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -21,7 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.phoenix.newsapp.R
-import com.phoenix.newsapp.ui.widget.HyperlinkText
+import com.phoenix.newsapp.widget.HyperlinkText
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 

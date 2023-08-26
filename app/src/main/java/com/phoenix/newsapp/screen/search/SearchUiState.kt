@@ -1,4 +1,4 @@
-package com.phoenix.newsapp.ui.screen.search
+package com.phoenix.newsapp.screen.search
 
 data class SearchUiState(
     val isSearched: Boolean = false,
