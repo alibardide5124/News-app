@@ -1,105 +1,78 @@
 package com.phoenix.newsapp.screen.home
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.phoenix.newsapp.BottomSheets
 import com.phoenix.newsapp.R
-import com.phoenix.newsapp.data.model.Article
 import com.phoenix.newsapp.widget.ListComposable
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import kotlinx.coroutines.launch
-import java.util.*
 
-@OptIn(ExperimentalMaterial3Api::class)
 @RootNavGraph(start = true)
 @Destination
 @Composable
 fun HomeScreen(
     navigator: DestinationsNavigator,
-    viewModel: HomeViewModel = hiltViewModel()
+    homeViewModel: HomeViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val newsSheetUiState by viewModel.newsSheetUiState.collectAsState()
+    val uiState by homeViewModel.uiState.collectAsState()
     val listState = rememberLazyListState(uiState.firstVisibleItem)
 
     LaunchedEffect(listState) {
-        viewModel.updateListState(listState.firstVisibleItemIndex)
+        homeViewModel.updateListState(listState.firstVisibleItemIndex)
     }
-    val sheetState = rememberModalBottomSheetState()
-    val coroutineScope = rememberCoroutineScope()
-    var currentItem: Article? by remember { mutableStateOf(null) }
-    viewModel.updateNavigator(navigator)
-
-    BackHandler(sheetState.isVisible) {
-        coroutineScope.launch {
-            sheetState.hide()
-        }
-    }
+    homeViewModel.updateNavigator(navigator)
 
     Scaffold(
-        topBar = { HomeTopBar { viewModel.onEvent(it) } }
+        topBar = { HomeTopBar(
+            onClickAbout = { homeViewModel.onEvent(HomeUiEvent.GoToAboutScreen) },
+            onClickFavorite = { homeViewModel.onEvent(HomeUiEvent.GoToFavoritesScreen) },
+            onClickSearch = { homeViewModel.onEvent(HomeUiEvent.GoToSearchScreen) }
+        ) }
     ) { paddingValues ->
         Box(
             modifier = Modifier.padding(paddingValues)
         ) {
-            Box(
-                modifier = Modifier
-                    .height(6.dp)
-                    .fillMaxWidth()
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                Color(0x21212121),
-                                Color.Transparent
-                            )
-                        )
-                    )
+            ListComposable(
+                items = homeViewModel.topHeadlines,
+                listState = listState,
+                onItemClick = { homeViewModel.onEvent(HomeUiEvent.OnClickItem(it)) }
             )
-            ListComposable(items = viewModel.topHeadlines, listState) { article ->
-                currentItem = article
-                coroutineScope.launch {
-                    sheetState.show()
-                    viewModel.isArticleExistsInFavorite(article.url)
-                }
-            }
-        }
-    }
-    if (sheetState.isVisible) {
-        ModalBottomSheet(
-            onDismissRequest = {},
-            sheetState = sheetState
-        ) {
-            BottomSheets.BottomSheetContent(currentItem!!, newsSheetUiState) {
-                if (newsSheetUiState.savedState == BottomSheets.SavedState.Saved)
-                    viewModel.deleteArticle(currentItem!!)
-                else if (newsSheetUiState.savedState == BottomSheets.SavedState.NotSaved)
-                    viewModel.insertArticle(currentItem!!)
-            }
         }
     }
 }
 
 @Composable
-private fun HomeTopBar(onEvent: (HomeUiEvent) -> Unit) {
+private fun HomeTopBar(
+    onClickAbout: () -> Unit,
+    onClickFavorite: () -> Unit,
+    onClickSearch: () -> Unit
+) {
     Box(
         modifier = Modifier
             .height(56.dp)
@@ -107,14 +80,14 @@ private fun HomeTopBar(onEvent: (HomeUiEvent) -> Unit) {
             .background(MaterialTheme.colorScheme.primary)
     ) {
         Row(modifier = Modifier.align(Alignment.CenterStart)) {
-            IconButton(onClick = { onEvent(HomeUiEvent.GoToAboutScreen) }) {
+            IconButton(onClick = { onClickAbout() }) {
                 Icon(
                     imageVector = Icons.Outlined.Info,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onPrimary,
                 )
             }
-            IconButton(onClick = { onEvent(HomeUiEvent.GoToFavoritesScreen) }) {
+            IconButton(onClick = { onClickFavorite() }) {
                 Icon(
                     painterResource(id = R.drawable.ic_bookmark),
                     contentDescription = null,
@@ -130,7 +103,7 @@ private fun HomeTopBar(onEvent: (HomeUiEvent) -> Unit) {
             modifier = Modifier.align(Alignment.Center)
         )
         IconButton(
-            onClick = { onEvent(HomeUiEvent.GoToSearchScreen) },
+            onClick = { onClickSearch() },
             modifier = Modifier.align(Alignment.CenterEnd)
         ) {
             Icon(

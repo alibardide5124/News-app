@@ -4,10 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.phoenix.newsapp.BottomSheets
-import com.phoenix.newsapp.data.database.ArticleBookmarkDao
 import com.phoenix.newsapp.data.model.Article
 import com.phoenix.newsapp.data.Repository
+import com.phoenix.newsapp.screen.destinations.BrowserScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,13 +18,10 @@ import javax.inject.Inject
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     private val repository: Repository,
-    private val articleBookmarkDao: ArticleBookmarkDao
 ): ViewModel() {
 
     private val _uiState = MutableStateFlow(SearchUiState())
-    private val _newsSheetUiState = MutableStateFlow(BottomSheets.NewsSheetUiState())
     val uiState = _uiState.asStateFlow()
-    val newsSheetUiState = _newsSheetUiState.asStateFlow()
     var searchedArticles = MutableStateFlow<PagingData<Article>>(PagingData.empty())
     private lateinit var navigator: DestinationsNavigator
 
@@ -51,37 +47,15 @@ class SearchViewModel @Inject constructor(
     fun onEvent(event: SearchUiEvent) {
         when(event) {
             SearchUiEvent.GoToHomeScreen ->
-                navigator.popBackStack()
+                navigator.navigateUp()
             SearchUiEvent.OnHitSearch ->
                 searchArticles()
             is SearchUiEvent.OnSearchQueryChange ->
                 _uiState.update { it.copy(searchedQuery = event.query) }
-        }
-    }
 
-    fun insertArticle(article: Article) {
-        _newsSheetUiState.update { it.copy(savedState = BottomSheets.SavedState.Loading) }
-        viewModelScope.launch {
-            articleBookmarkDao.insertArticle(article)
-            _newsSheetUiState.update { it.copy(savedState = BottomSheets.SavedState.Saved) }
+            is SearchUiEvent.OnClickItem ->
+                navigator.navigate(BrowserScreenDestination(event.article))
         }
-    }
-
-    fun deleteArticle(article: Article) {
-        _newsSheetUiState.update { it.copy(savedState = BottomSheets.SavedState.Loading) }
-        viewModelScope.launch {
-            articleBookmarkDao.deleteArticle(article)
-            _newsSheetUiState.update { it.copy(savedState = BottomSheets.SavedState.NotSaved) }
-        }
-    }
-
-    suspend fun isArticleExistsInFavorite(url: String) {
-        _newsSheetUiState.update { it.copy(savedState = BottomSheets.SavedState.Loading) }
-        val isExist = articleBookmarkDao.isRowExist(url)
-        if (isExist)
-            _newsSheetUiState.update { it.copy(savedState = BottomSheets.SavedState.Saved) }
-        else
-            _newsSheetUiState.update { it.copy(savedState = BottomSheets.SavedState.NotSaved) }
     }
 
 }

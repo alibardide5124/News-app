@@ -4,7 +4,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.phoenix.newsapp.data.model.Article
 
-@Database(entities = [Article::class], version = 1)
+@Database(entities = [Article::class], version = 1, exportSchema = false)
 abstract class AppDatabase: RoomDatabase() {
     abstract val articleBookmarkDao: ArticleBookmarkDao
 }

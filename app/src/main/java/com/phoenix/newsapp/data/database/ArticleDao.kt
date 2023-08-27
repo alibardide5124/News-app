@@ -3,13 +3,14 @@ package com.phoenix.newsapp.data.database
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.phoenix.newsapp.data.model.Article
 
 @Dao
 interface ArticleBookmarkDao {
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertArticle(article: Article)
 
     @Delete

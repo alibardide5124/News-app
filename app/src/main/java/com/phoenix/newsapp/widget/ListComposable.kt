@@ -23,7 +23,6 @@ import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.items
 import com.phoenix.newsapp.data.model.Article
 import kotlinx.coroutines.flow.Flow
 
@@ -105,8 +104,9 @@ fun ListComposable(
         exit = fadeOut()
     ) {
         LazyColumn(state = listState) {
-            items(lazyItems) { article ->
-                if (article!!.source.id != null)
+            items(lazyItems.itemCount) { index ->
+                val article = lazyItems[index]!!
+                if (article.source.id != null)
                     HeadlineVerified(article) { onItemClick(article) }
                 else
                     Headline(article) { onItemClick(article) }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.NewsApp" parent="Theme.Material3.DayNight" >
+    <style name="Theme.NewsApp" parent="android:Theme.Material.NoActionBar" >
         <item name="font">@font/open_sans</item>
     </style>
 </resources>

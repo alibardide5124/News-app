@@ -3,7 +3,15 @@ package com.phoenix.newsapp.widget
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.Button
@@ -13,15 +21,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.items
 import com.phoenix.newsapp.data.model.Article
 import kotlinx.coroutines.flow.Flow
 
@@ -97,22 +102,14 @@ fun FavoriteListComposable(
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "You might like to consider add some news next time",
-                color = MaterialTheme.colorScheme.onBackground,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.alpha(0.8f)
-            )
         }
     }
 //    News list
     AnimatedVisibility(visible = lazyItems.itemCount != 0, enter = fadeIn(), exit = fadeOut()) {
         LazyColumn(state = listState) {
-            items(lazyItems) { article ->
-                Headline(article!!) { onItemClick(article) }
+            items(lazyItems.itemCount) { index ->
+                val article = lazyItems[index]!!
+                Headline(article) { onItemClick(article) }
             }
 //            Circle loading at the end of list
             if (lazyItems.loadState.append is LoadState.Loading) {

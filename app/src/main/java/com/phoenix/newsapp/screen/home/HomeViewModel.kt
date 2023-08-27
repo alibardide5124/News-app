@@ -4,11 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.phoenix.newsapp.BottomSheets
-import com.phoenix.newsapp.data.database.ArticleBookmarkDao
-import com.phoenix.newsapp.data.model.Article
 import com.phoenix.newsapp.data.Repository
+import com.phoenix.newsapp.data.model.Article
 import com.phoenix.newsapp.screen.destinations.AboutScreenDestination
+import com.phoenix.newsapp.screen.destinations.BrowserScreenDestination
 import com.phoenix.newsapp.screen.destinations.FavoriteScreenDestination
 import com.phoenix.newsapp.screen.destinations.SearchScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -22,13 +21,10 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val repository: Repository,
-    private val articleBookmarkDao: ArticleBookmarkDao
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
-    private val _newsSheetUiState = MutableStateFlow(BottomSheets.NewsSheetUiState())
     val uiState = _uiState.asStateFlow()
-    val newsSheetUiState = _newsSheetUiState.asStateFlow()
     private lateinit var navigator: DestinationsNavigator
     val topHeadlines = MutableStateFlow<PagingData<Article>>(PagingData.empty())
 
@@ -61,32 +57,10 @@ class HomeViewModel @Inject constructor(
                 navigator.navigate(SearchScreenDestination)
             HomeUiEvent.GoToFavoritesScreen ->
                 navigator.navigate(FavoriteScreenDestination)
-        }
-    }
 
-    fun insertArticle(article: Article) {
-        _newsSheetUiState.update { it.copy(savedState = BottomSheets.SavedState.Loading) }
-        viewModelScope.launch {
-            articleBookmarkDao.insertArticle(article)
-            _newsSheetUiState.update { it.copy(savedState = BottomSheets.SavedState.Saved) }
+            is HomeUiEvent.OnClickItem ->
+                navigator.navigate(BrowserScreenDestination(event.article))
         }
-    }
-
-    fun deleteArticle(article: Article) {
-        _newsSheetUiState.update { it.copy(savedState = BottomSheets.SavedState.Loading) }
-        viewModelScope.launch {
-            articleBookmarkDao.deleteArticle(article)
-            _newsSheetUiState.update { it.copy(savedState = BottomSheets.SavedState.NotSaved) }
-        }
-    }
-
-    suspend fun isArticleExistsInFavorite(url: String) {
-        _newsSheetUiState.update { it.copy(savedState = BottomSheets.SavedState.Loading) }
-        val isExist = articleBookmarkDao.isRowExist(url)
-        if (isExist)
-            _newsSheetUiState.update { it.copy(savedState = BottomSheets.SavedState.Saved) }
-        else
-            _newsSheetUiState.update { it.copy(savedState = BottomSheets.SavedState.NotSaved) }
     }
 
 }

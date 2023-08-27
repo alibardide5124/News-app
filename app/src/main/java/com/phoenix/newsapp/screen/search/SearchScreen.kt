@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,8 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -30,65 +27,45 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.phoenix.newsapp.BottomSheets
 import com.phoenix.newsapp.R
-import com.phoenix.newsapp.data.model.Article
 import com.phoenix.newsapp.widget.ListComposable
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Destination
 @Composable
 fun SearchScreen(
     navigator: DestinationsNavigator,
-    viewModel: SearchViewModel = hiltViewModel()
+    searchViewModel: SearchViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val newsSheetUiState by viewModel.newsSheetUiState.collectAsState()
+    val uiState by searchViewModel.uiState.collectAsState()
     val listState = rememberLazyListState(uiState.firstVisibleItem)
     val keyboard = LocalSoftwareKeyboardController.current
 
     LaunchedEffect(listState) {
-        viewModel.updateListState(listState.firstVisibleItemIndex)
+        searchViewModel.updateListState(listState.firstVisibleItemIndex)
     }
-    val sheetState = rememberModalBottomSheetState()
-    val coroutineScope = rememberCoroutineScope()
-    var currentItem: Article? by remember { mutableStateOf(null) }
-
-    viewModel.updateNavigator(navigator)
+    searchViewModel.updateNavigator(navigator)
 
     Scaffold(
         topBar = {
             SearchTopAppBar(
                 text = uiState.searchedQuery,
                 onTextChange = {
-                    viewModel.onEvent(SearchUiEvent.OnSearchQueryChange(it))
-                }, onSearchClicked = {
-                    viewModel.onEvent(SearchUiEvent.OnHitSearch)
+                    searchViewModel.onEvent(SearchUiEvent.OnSearchQueryChange(it))
+                },
+                onSearchClicked = {
+                    searchViewModel.onEvent(SearchUiEvent.OnHitSearch)
                     keyboard?.hide()
-                }, onCloseClicked = {
-                    navigator.popBackStack()
-                }
+                },
+                onCloseClicked = { navigator.navigateUp() }
             )
         }
-    ) {
+    ) { paddingValues ->
         Box(
-            modifier = Modifier.padding(it)
+            modifier = Modifier.padding(paddingValues)
         ) {
-            Box(
-                modifier = Modifier
-                    .height(6.dp)
-                    .fillMaxWidth()
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                Color(0x21212121), Color.Transparent
-                            )
-                        )
-                    )
-            )
             AnimatedVisibility(
                 visible = uiState.isSearched.not(),
                 enter = fadeIn(),
@@ -96,27 +73,16 @@ fun SearchScreen(
             ) {
                 EmptySearchIllustration()
             }
-            AnimatedVisibility(visible = uiState.isSearched, enter = fadeIn(), exit = fadeOut()) {
-                ListComposable(items = viewModel.searchedArticles, listState) { article ->
-                    currentItem = article
-                    coroutineScope.launch {
-                        sheetState.show()
-                        viewModel.isArticleExistsInFavorite(article.url)
-                    }
-                }
-            }
-        }
-    }
-    if (sheetState.isVisible) {
-        ModalBottomSheet(
-            onDismissRequest = {},
-            sheetState = sheetState
-        ) {
-            BottomSheets.BottomSheetContent(currentItem!!, newsSheetUiState) {
-                if (newsSheetUiState.savedState == BottomSheets.SavedState.Saved)
-                    viewModel.deleteArticle(currentItem!!)
-                else if (newsSheetUiState.savedState == BottomSheets.SavedState.NotSaved)
-                    viewModel.insertArticle(currentItem!!)
+            AnimatedVisibility(
+                visible = uiState.isSearched,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                ListComposable(
+                    items = searchViewModel.searchedArticles,
+                    listState = listState,
+                    onItemClick = { searchViewModel.onEvent(SearchUiEvent.OnClickItem(it))}
+                )
             }
         }
     }
