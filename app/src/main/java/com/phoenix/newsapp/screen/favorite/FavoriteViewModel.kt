@@ -33,6 +33,9 @@ class FavoriteViewModel @Inject constructor(
         when(event) {
             is FavoriteUiEvent.OnItemClick ->
                 navigator.navigate(BrowserScreenDestination(event.article))
+
+            FavoriteUiEvent.Refresh ->
+                getSavedArticles()
         }
     }
 

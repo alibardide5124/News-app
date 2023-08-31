@@ -23,18 +23,33 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.phoenix.newsapp.screen.destinations.BrowserScreenDestination
 import com.phoenix.newsapp.widget.FavoriteListComposable
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.ramcosta.composedestinations.result.NavResult
+import com.ramcosta.composedestinations.result.ResultRecipient
 
 @Destination
 @Composable
 fun FavoriteScreen(
     navigator: DestinationsNavigator,
+    resultRecipient: ResultRecipient<BrowserScreenDestination, Boolean>,
     favoriteViewModel: FavoriteViewModel = hiltViewModel()
 ) {
     val uiState by favoriteViewModel.uiState.collectAsState()
     val listState = rememberLazyListState(uiState.firstVisibleItem)
+
+    resultRecipient.onNavResult { result ->
+        when (result) {
+            is NavResult.Canceled -> {}
+
+            is NavResult.Value -> {
+                if (!result.value)
+                    favoriteViewModel.onEvent(FavoriteUiEvent.Refresh)
+            }
+        }
+    }
 
     LaunchedEffect(listState) {
         favoriteViewModel.updateListState(listState.firstVisibleItemIndex)

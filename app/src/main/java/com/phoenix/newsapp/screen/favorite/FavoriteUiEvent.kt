@@ -4,4 +4,5 @@ import com.phoenix.newsapp.data.model.Article
 
 sealed interface FavoriteUiEvent {
     data class OnItemClick(val article: Article): FavoriteUiEvent
+    data object Refresh: FavoriteUiEvent
 }

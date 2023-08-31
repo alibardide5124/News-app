@@ -1,15 +1,24 @@
 package com.phoenix.newsapp.widget
 
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -43,7 +52,7 @@ fun Headline(
             .clickable { onClick() }
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
-        val (imageRef, titleRef, authorRef, strokeRef) = createRefs()
+        val (imageRef, titleRef, authorRef) = createRefs()
         val imageGuideline = createGuidelineFromStart(.3f)
 
         val imagePainter = rememberAsyncImagePainter(
@@ -53,46 +62,59 @@ fun Headline(
                 .build(),
             contentScale = ContentScale.Crop
             )
+        val transition = rememberInfiniteTransition(label = "")
+        val colorAnimation by transition.animateColor(
+            initialValue = MaterialTheme.colorScheme.surfaceVariant,
+            targetValue = MaterialTheme.colorScheme.outline,
+            animationSpec = infiniteRepeatable(
+                animation = tween(
+                    durationMillis = 500,
+                    delayMillis = 250
+                ),
+                repeatMode = RepeatMode.Reverse
+            ),
+            label = ""
+        )
+
         Box(
             modifier = Modifier
-                .fillMaxSize()
                 .constrainAs(imageRef) {
                     top.linkTo(parent.top)
                     start.linkTo(parent.start)
                     end.linkTo(imageGuideline)
-                    bottom.linkTo(authorRef.bottom)
                     width = Dimension.fillToConstraints
-                    height = Dimension.fillToConstraints
                 }
+                .aspectRatio(4 / 3f)
                 .clip(RoundedCornerShape(8.dp))
                 .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center
         ) {
-            when (imagePainter.state) {
-                is AsyncImagePainter.State.Loading ->
-                    CircularProgressIndicator(modifier = Modifier.padding(8.dp))
-                AsyncImagePainter.State.Empty, is AsyncImagePainter.State.Error -> {
+            if (imagePainter.state is AsyncImagePainter.State.Error)
                     Icon(
                         painterResource(R.drawable.ic_image),
                         null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(8.dp)
                     )
-                }
-                else -> {}
-            }
+
             Image(
                 painter = imagePainter,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        when (imagePainter.state) {
+                            is AsyncImagePainter.State.Loading -> colorAnimation
+                            else -> Color.Transparent
+                        }
+                    )
             )
         }
         Text(
             text = article.title,
             fontWeight = FontWeight.SemiBold,
             fontSize = 14.sp,
-            maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.constrainAs(titleRef) {
                 top.linkTo(parent.top, 4.dp)
@@ -134,19 +156,6 @@ fun Headline(
                     }
             )
         }
-        Spacer(
-            modifier = Modifier
-                .background(Color.Black)
-                .constrainAs(strokeRef) {
-                    top.linkTo(imageRef.bottom, 8.dp)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    bottom.linkTo(parent.bottom)
-                    width = Dimension.fillToConstraints
-                    height = Dimension.preferredValue(4.dp)
-                }
-                .clip(RoundedCornerShape(2.dp))
-        )
     }
 }
 

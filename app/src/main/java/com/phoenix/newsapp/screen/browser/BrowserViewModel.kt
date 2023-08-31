@@ -66,10 +66,13 @@ class BrowserViewModel @Inject constructor(
         }
     }
 
-
     fun isArticleExistsInFavorite(url: String) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isSaved = articleBookmarkDao.isRowExist(url)) }
+            val isRowExist = articleBookmarkDao.isRowExist(url)
+            _uiState.update { it.copy(
+                isSaved = isRowExist,
+                initialSaveState = isRowExist
+            ) }
         }
     }
 

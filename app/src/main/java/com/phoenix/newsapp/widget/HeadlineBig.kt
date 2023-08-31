@@ -1,15 +1,20 @@
 package com.phoenix.newsapp.widget
 
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -60,6 +65,19 @@ fun HeadlineVerified(
                     .build(),
                 contentScale = ContentScale.Crop
             )
+            val transition = rememberInfiniteTransition(label = "")
+            val colorAnimation by transition.animateColor(
+                initialValue = MaterialTheme.colorScheme.surfaceVariant,
+                targetValue = MaterialTheme.colorScheme.outline,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(
+                        durationMillis = 500,
+                        delayMillis = 250
+                    ),
+                    repeatMode = RepeatMode.Reverse
+                ),
+                label = ""
+            )
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -74,23 +92,26 @@ fun HeadlineVerified(
                     .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
-                when (imagePainter.state) {
-                    is AsyncImagePainter.State.Loading ->
-                        CircularProgressIndicator()
-                    is AsyncImagePainter.State.Error ->
+                if (imagePainter.state is AsyncImagePainter.State.Error)
                         Icon(
                             painterResource(R.drawable.ic_image),
                             null,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(24.dp)
                         )
-                    else -> {}
-                }
+
                 Image(
                     painter = imagePainter,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            when (imagePainter.state) {
+                                is AsyncImagePainter.State.Loading -> colorAnimation
+                                else -> Color.Transparent
+                            }
+                        )
                 )
             }
             Box(
