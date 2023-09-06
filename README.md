@@ -12,17 +12,16 @@ Download app from [**here**](https://github.com/alibardide5124/News-app/releases
 App Screenshots
 -----
 
-Here are a few shots from app inteface. This screenshots are from April 04, 2023 (so they might be outdated (': ) 
+Here are a few shots from app interface. 
 
-| <img src="/readme.files/image-home.jpg" alt="Home view" width="300" /> | <img src="/readme.files/image-sheet.jpg" alt="News view" width="300" /> |
+<img src="/readme.files/image-phone.png" alt="Home view" width="300" /> 
+<img src="/readme.files/image-large.png" alt="News view" width="500" />
 
 </br>
 
 I Hope you enjoy it :)
 
 </br></br>
-
-There will be next updates with more features. :)
 
 Support
 -----

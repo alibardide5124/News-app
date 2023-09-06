@@ -1,104 +1,136 @@
 package com.phoenix.newsapp.screen.favorite
 
-import androidx.compose.foundation.background
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.KeyboardArrowLeft
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.phoenix.newsapp.screen.destinations.BrowserScreenDestination
-import com.phoenix.newsapp.widget.FavoriteListComposable
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.result.NavResult
-import com.ramcosta.composedestinations.result.ResultRecipient
+import androidx.paging.PagingData
+import com.phoenix.newsapp.components.FavoriteListComposable
+import com.phoenix.newsapp.data.model.Article
+import com.phoenix.newsapp.screen.browser.BrowserExpandedScreen
+import com.phoenix.newsapp.screen.browser.BrowserScreen
+import kotlinx.coroutines.flow.MutableStateFlow
 
-@Destination
 @Composable
-fun FavoriteScreen(
-    navigator: DestinationsNavigator,
-    resultRecipient: ResultRecipient<BrowserScreenDestination, Boolean>,
-    favoriteViewModel: FavoriteViewModel = hiltViewModel()
+fun FavoriteList(
+    onNavigateBack: () -> Unit,
+    lazyGridState: LazyGridState,
+    listItems: MutableStateFlow<PagingData<Article>>,
+    onClickArticle: (Article) -> Unit,
+    selectedArticle: Article?,
+    dismissArticle: () -> Unit,
+    onClickSave: (Boolean) -> Unit
 ) {
-    val uiState by favoriteViewModel.uiState.collectAsState()
-    val listState = rememberLazyListState(uiState.firstVisibleItem)
-
-    resultRecipient.onNavResult { result ->
-        when (result) {
-            is NavResult.Canceled -> {}
-
-            is NavResult.Value -> {
-                if (!result.value)
-                    favoriteViewModel.onEvent(FavoriteUiEvent.Refresh)
-            }
-        }
-    }
-
-    LaunchedEffect(listState) {
-        favoriteViewModel.updateListState(listState.firstVisibleItemIndex)
-    }
-    favoriteViewModel.updateNavigator(navigator)
-
-    Scaffold(
-        topBar = { FavoriteTopBar(
-            onBackClick = { navigator.navigateUp() }
-        ) }
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier.padding(paddingValues)
-        ) {
-            FavoriteListComposable(
-                items = favoriteViewModel.savedArticles,
-                listState = listState,
-                onItemClick = { article ->
-                    favoriteViewModel.onEvent(FavoriteUiEvent.OnItemClick(article))
-                }
+    Crossfade(targetState = selectedArticle, label = "") {
+        if (it != null)
+            BrowserScreen(
+                article = it,
+                onClickSave = { isSaved -> onClickSave(isSaved) },
+                dismissArticle = { dismissArticle() }
             )
-        }
+        else
+            FavoriteScreenContent(
+                isTopBar = true,
+                onNavigateBack = { onNavigateBack() },
+                lazyGridState = lazyGridState,
+                listItems = listItems,
+                onClickArticle = onClickArticle
+            )
     }
 }
 
 @Composable
-private fun FavoriteTopBar(onBackClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .height(56.dp)
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.primary)
-    ) {
-        IconButton(
-            onClick = { onBackClick() },
-            modifier = Modifier.align(Alignment.CenterStart)
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.KeyboardArrowLeft,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onPrimary,
-            )
+fun FavoriteWithBrowser(
+    onNavigateBack: () -> Unit,
+    lazyGridState: LazyGridState,
+    listItems: MutableStateFlow<PagingData<Article>>,
+    onClickArticle: (Article) -> Unit,
+    selectedArticle: Article?,
+    dismissArticle: () -> Unit,
+    onClickSave: (Boolean) -> Unit
+) {
+    FavoriteScreenContent(
+        isTopBar = false,
+        onNavigateBack = { onNavigateBack() },
+        lazyGridState = lazyGridState,
+        listItems = listItems,
+        onClickArticle = onClickArticle,
+        modifier = Modifier.width(334.dp),
+        browserContent = {
+            Crossfade(targetState = selectedArticle, label = "") {
+                if (it != null)
+                    BrowserExpandedScreen(
+                        article = it,
+                        onClickSave = { isSaved -> onClickSave(isSaved) },
+                        dismissArticle = { dismissArticle() }
+                    )
+            }
         }
-        Text(
-            text = "Favorites",
-            color = MaterialTheme.colorScheme.onPrimary,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.align(Alignment.Center)
-        )
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FavoriteScreenContent(
+    isTopBar: Boolean,
+    onNavigateBack: () -> Unit,
+    lazyGridState: LazyGridState,
+    listItems: MutableStateFlow<PagingData<Article>>,
+    onClickArticle: (Article) -> Unit,
+    modifier: Modifier = Modifier,
+    browserContent: @Composable () -> Unit = {}
+) {
+    Scaffold(
+        topBar = {
+            if (isTopBar)
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text("Favorites")
+                    },
+                    navigationIcon = {
+                        IconButton(
+                            onClick = { onNavigateBack() },
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.KeyboardArrowLeft,
+                                contentDescription = null,
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                        navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                )
+        }
+    ) { paddingValues ->
+        FavoriteListComposable(
+            items = listItems,
+            listState = lazyGridState,
+            onClickArticle = { article -> onClickArticle(article) },
+            modifier = modifier,
+            browserContent = { browserContent() }
+        ) { listContent ->
+            Box(
+                modifier = Modifier.padding(paddingValues)
+            ) {
+                listContent()
+            }
+        }
     }
 }

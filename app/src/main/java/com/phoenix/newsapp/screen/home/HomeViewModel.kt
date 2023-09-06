@@ -7,9 +7,8 @@ import androidx.paging.cachedIn
 import com.phoenix.newsapp.data.Repository
 import com.phoenix.newsapp.data.model.Article
 import com.phoenix.newsapp.screen.destinations.AboutScreenDestination
-import com.phoenix.newsapp.screen.destinations.BrowserScreenDestination
-import com.phoenix.newsapp.screen.destinations.FavoriteScreenDestination
-import com.phoenix.newsapp.screen.destinations.SearchScreenDestination
+import com.phoenix.newsapp.screen.destinations.FavoriteRouteDestination
+import com.phoenix.newsapp.screen.destinations.SearchRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,14 +51,25 @@ class HomeViewModel @Inject constructor(
     fun onEvent(event: HomeUiEvent) {
         when (event) {
             HomeUiEvent.GoToAboutScreen ->
-                navigator.navigate(AboutScreenDestination)
-            HomeUiEvent.GoToSearchScreen ->
-                navigator.navigate(SearchScreenDestination)
-            HomeUiEvent.GoToFavoritesScreen ->
-                navigator.navigate(FavoriteScreenDestination)
+                navigator.navigate(AboutScreenDestination) {
+                    launchSingleTop = true
+                }
 
-            is HomeUiEvent.OnClickItem ->
-                navigator.navigate(BrowserScreenDestination(event.article))
+            HomeUiEvent.GoToSearchScreen ->
+                navigator.navigate(SearchRouteDestination) {
+                    launchSingleTop = true
+                }
+
+            HomeUiEvent.GoToFavoritesScreen ->
+                navigator.navigate(FavoriteRouteDestination) {
+                    launchSingleTop = true
+                }
+
+            is HomeUiEvent.OnSelectArticle ->
+                _uiState.update { it.copy(selectedPost = event.article) }
+
+            HomeUiEvent.OnCloseArticle ->
+                _uiState.update { it.copy(selectedPost = null) }
         }
     }
 

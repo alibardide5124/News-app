@@ -6,7 +6,6 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.phoenix.newsapp.data.Repository
 import com.phoenix.newsapp.data.model.Article
-import com.phoenix.newsapp.screen.destinations.BrowserScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,11 +30,17 @@ class FavoriteViewModel @Inject constructor(
 
     fun onEvent(event: FavoriteUiEvent) {
         when(event) {
-            is FavoriteUiEvent.OnItemClick ->
-                navigator.navigate(BrowserScreenDestination(event.article))
+            is FavoriteUiEvent.OnSelectArticle ->
+                _uiState.update { it.copy(selectedArticle = event.article) }
 
-            FavoriteUiEvent.Refresh ->
+            FavoriteUiEvent.OnCloseArticle ->
+                _uiState.update { it.copy(selectedArticle = null) }
+
+            is FavoriteUiEvent.OnClickFavorite ->
                 getSavedArticles()
+
+            FavoriteUiEvent.OnDataLoaded ->
+                _uiState.update { it.copy(dataLoaded = true) }
         }
     }
 
