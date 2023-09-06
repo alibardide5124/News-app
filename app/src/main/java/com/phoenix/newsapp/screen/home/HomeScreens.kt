@@ -1,12 +1,14 @@
-package com.phoenix.newsapp.screen.favorite
+package com.phoenix.newsapp.screen.home
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -17,65 +19,71 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.PagingData
-import com.phoenix.newsapp.components.FavoriteListComposable
+import com.phoenix.newsapp.R
+import com.phoenix.newsapp.components.FeedListComposable
 import com.phoenix.newsapp.data.model.Article
 import com.phoenix.newsapp.screen.browser.BrowserExpandedScreen
 import com.phoenix.newsapp.screen.browser.BrowserScreen
 import kotlinx.coroutines.flow.MutableStateFlow
 
+
 @Composable
-fun FavoriteList(
-    onNavigateBack: () -> Unit,
+fun HomeFeedList(
+    onClickAbout: () -> Unit,
+    onClickFavorite: () -> Unit,
+    onClickSearch: () -> Unit,
     lazyGridState: LazyGridState,
     listItems: MutableStateFlow<PagingData<Article>>,
     onClickArticle: (Article) -> Unit,
     selectedArticle: Article?,
-    dismissArticle: () -> Unit,
-    onClickSave: (Boolean) -> Unit
+    dismissArticle: () -> Unit
 ) {
     Crossfade(targetState = selectedArticle, label = "") {
         if (it != null)
             BrowserScreen(
                 article = it,
-                onClickSave = { isSaved -> onClickSave(isSaved) },
                 dismissArticle = { dismissArticle() }
             )
         else
-            FavoriteScreenContent(
-                isTopBar = true,
-                onNavigateBack = { onNavigateBack() },
-                lazyGridState = lazyGridState,
-                listItems = listItems,
-                onClickArticle = onClickArticle
+            HomeScreenWithList(
+                isTopAppBar = true,
+                onClickAbout = { onClickAbout() },
+                onClickFavorite = { onClickFavorite() },
+                onClickSearch = { onClickSearch() },
+                lazyGridState,
+                listItems,
+                onClickArticle = { article -> onClickArticle(article) }
             )
     }
+
 }
 
 @Composable
-fun FavoriteWithBrowser(
-    onNavigateBack: () -> Unit,
+fun HomeFeedWithBrowser(
     lazyGridState: LazyGridState,
     listItems: MutableStateFlow<PagingData<Article>>,
     onClickArticle: (Article) -> Unit,
     selectedArticle: Article?,
-    dismissArticle: () -> Unit,
-    onClickSave: (Boolean) -> Unit
+    dismissArticle: () -> Unit
 ) {
-    FavoriteScreenContent(
-        isTopBar = false,
-        onNavigateBack = { onNavigateBack() },
-        lazyGridState = lazyGridState,
-        listItems = listItems,
-        onClickArticle = onClickArticle,
+    HomeScreenWithList(
+        isTopAppBar = false,
+        onClickAbout = null,
+        onClickFavorite = null,
+        onClickSearch = null,
+        lazyGridState,
+        listItems,
+        onClickArticle = { onClickArticle(it) },
         modifier = Modifier.width(334.dp),
         browserContent = {
             Crossfade(targetState = selectedArticle, label = "") {
                 if (it != null)
                     BrowserExpandedScreen(
                         article = it,
-                        onClickSave = { isSaved -> onClickSave(isSaved) },
                         dismissArticle = { dismissArticle() }
                     )
             }
@@ -85,9 +93,11 @@ fun FavoriteWithBrowser(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FavoriteScreenContent(
-    isTopBar: Boolean,
-    onNavigateBack: () -> Unit,
+fun HomeScreenWithList(
+    isTopAppBar: Boolean,
+    onClickAbout: (() -> Unit)?,
+    onClickFavorite: (() -> Unit)?,
+    onClickSearch: (() -> Unit)?,
     lazyGridState: LazyGridState,
     listItems: MutableStateFlow<PagingData<Article>>,
     onClickArticle: (Article) -> Unit,
@@ -96,38 +106,51 @@ fun FavoriteScreenContent(
 ) {
     Scaffold(
         topBar = {
-            if (isTopBar)
+            if (isTopAppBar)
                 CenterAlignedTopAppBar(
-                    title = {
-                        Text("Favorites")
-                    },
+                    title = { Text(stringResource(R.string.app_name)) },
                     navigationIcon = {
-                        IconButton(
-                            onClick = { onNavigateBack() },
-                        ) {
+                        Row {
+                            IconButton(onClick = { onClickAbout?.invoke() }) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Info,
+                                    contentDescription = null,
+                                )
+                            }
+                            IconButton(onClick = { onClickFavorite?.invoke() }) {
+                                Icon(
+                                    painterResource(id = R.drawable.ic_bookmark),
+                                    contentDescription = null,
+                                )
+                            }
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = { onClickSearch?.invoke() }) {
                             Icon(
-                                imageVector = Icons.Outlined.KeyboardArrowLeft,
+                                imageVector = Icons.Default.Search,
                                 contentDescription = null,
                             )
                         }
                     },
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                         containerColor = MaterialTheme.colorScheme.primary,
-                        titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                        navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+                        navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                        actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 )
-        }
-    ) { paddingValues ->
-        FavoriteListComposable(
+        },
+    ) { innerPadding ->
+        FeedListComposable(
             items = listItems,
             listState = lazyGridState,
-            onClickArticle = { article -> onClickArticle(article) },
-            modifier = modifier,
-            browserContent = { browserContent() }
+            onClickArticle = { onClickArticle(it) },
+            browserContent = { browserContent() },
+            modifier = modifier
         ) { listContent ->
             Box(
-                modifier = Modifier.padding(paddingValues)
+                modifier = Modifier.padding(innerPadding)
             ) {
                 listContent()
             }

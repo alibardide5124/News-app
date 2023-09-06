@@ -6,5 +6,6 @@ sealed interface HomeUiEvent {
     data object GoToSearchScreen: HomeUiEvent
     data object GoToAboutScreen: HomeUiEvent
     data object GoToFavoritesScreen: HomeUiEvent
-    data class OnClickItem(val article: Article): HomeUiEvent
+    data class OnSelectArticle(val article: Article): HomeUiEvent
+    data object OnCloseArticle: HomeUiEvent
 }

@@ -1,4 +1,4 @@
-package com.phoenix.newsapp.widget
+package com.phoenix.newsapp.components
 
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.RepeatMode

@@ -6,5 +6,6 @@ data class BrowserUiState(
     val article: Article? = null,
     val isSaved: Boolean = false,
     val initialSaveState: Boolean = false,
-    val isLoadingFinished: Boolean = false
+    val isLoadingFinished: Boolean = false,
+    val isLoadingError: Boolean = false
 )

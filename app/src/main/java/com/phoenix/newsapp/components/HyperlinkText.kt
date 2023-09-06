@@ -1,4 +1,4 @@
-package com.phoenix.newsapp.widget
+package com.phoenix.newsapp.components
 
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.MaterialTheme

@@ -6,7 +6,6 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.phoenix.newsapp.data.model.Article
 import com.phoenix.newsapp.data.Repository
-import com.phoenix.newsapp.screen.destinations.BrowserScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,13 +47,19 @@ class SearchViewModel @Inject constructor(
         when(event) {
             SearchUiEvent.GoToHomeScreen ->
                 navigator.navigateUp()
+
             SearchUiEvent.OnHitSearch ->
                 searchArticles()
+
             is SearchUiEvent.OnSearchQueryChange ->
                 _uiState.update { it.copy(searchedQuery = event.query) }
 
-            is SearchUiEvent.OnClickItem ->
-                navigator.navigate(BrowserScreenDestination(event.article))
+            SearchUiEvent.OnCloseArticle ->
+                _uiState.update { it.copy(selectedArticle = null) }
+
+            is SearchUiEvent.OnSelectArticle ->
+                _uiState.update { it.copy(selectedArticle = event.article) }
+
         }
     }
 

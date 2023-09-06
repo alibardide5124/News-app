@@ -63,6 +63,13 @@ class BrowserViewModel @Inject constructor(
 
             BrowserUiEvent.PageLoadingFinished ->
                 _uiState.update { it.copy(isLoadingFinished = true) }
+
+            BrowserUiEvent.PageLoadingError ->
+                _uiState.update { it.copy(isLoadingError = true) }
+
+            BrowserUiEvent.PageLoadingStarted ->
+                _uiState.update { it.copy(isLoadingError = false) }
+
         }
     }
 

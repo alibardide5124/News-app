@@ -6,5 +6,6 @@ sealed interface SearchUiEvent {
     data class OnSearchQueryChange(val query: String): SearchUiEvent
     data object OnHitSearch: SearchUiEvent
     data object GoToHomeScreen: SearchUiEvent
-    data class OnClickItem(val article: Article): SearchUiEvent
+    data class OnSelectArticle(val article: Article): SearchUiEvent
+    data object OnCloseArticle: SearchUiEvent
 }
